@@ -11,16 +11,16 @@ public static class MapGenerator
     /// <param name="width"> Width of map </param>
     /// <param name="height"> Height of map </param>
     /// <returns> 2D uint array </returns>
-    public static uint[,] GenerateMap(int texturesNum, uint width, uint height)
+    public static int[,] GenerateMap(int texturesNum, uint width, uint height)
     {
-        uint[,] map = new uint[width, height];
+        int[,] map = new int[width, height];
 
         // Fill the array
         for(int i = 0; i < width; i++)
         {
             for(int j = 0; j < height; j++)
             {
-                map[i, j] = 0;
+                map[i, j] = Random.Range(0, texturesNum);
             }
         }
 

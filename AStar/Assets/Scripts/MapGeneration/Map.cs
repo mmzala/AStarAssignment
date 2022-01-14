@@ -31,17 +31,32 @@ public class Map : MonoBehaviour
 
     private void CreateMap()
     {
-        uint[,] map = MapGenerator.GenerateMap(textures.Count, width, height);
+        int[,] map = MapGenerator.GenerateMap(textures.Count, width, height);
 
         // Create hexagon map
         for (int x = 0; x < width; x++)
         {
             for(int y = 0; y < height; y++)
             {
-                Transform hexagon = Instantiate(hexagonPrefab, transform);
-                hexagon.transform.position = CalculateHexagonWorldPosition(x, y);
+                CreateHexagon(map[x, y], x, y);
             }
         }
+    }
+
+    /// <summary>
+    /// Creates the hexagon, sets it's position in the map and sets it's material
+    /// </summary>
+    /// <param name="hexagonType"> What texture it's going to use from the textures list </param>
+    /// <param name="x"> X position </param>
+    /// <param name="y"> Y position </param>
+    private void CreateHexagon(int hexagonType, int x, int y)
+    {
+        Transform hexagon = Instantiate(hexagonPrefab, transform);
+
+        hexagon.position = CalculateHexagonWorldPosition(x, y);
+        hexagon.eulerAngles = new Vector3(0, 180, 0); // Rotate the hexagon so the texture looks right
+
+        hexagon.GetComponent<Renderer>().material.SetTexture("_MainTex", textures[hexagonType]);
     }
 
     private Vector3 CalculateHexagonWorldPosition(int x, int y)
