@@ -1,10 +1,12 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Pathing;
 
 public class Map : MonoBehaviour
 {
-    public List<Texture2D> textures;
+    [Header("Tiles")]
+    public List<TileType> tileTypes;
 
     [Header("Map Size")]
     [SerializeField, Min(5)]
@@ -21,6 +23,9 @@ public class Map : MonoBehaviour
     [SerializeField, Min(0f)]
     private float haxagonGap = 0f;
 
+    // All hexagon tiles in the map
+    private Tile[,] tiles;
+
     // Used to get the right z coordinate for the tile
     private const float hexagonHeightDiffrence = 0.75f;
 
@@ -31,7 +36,8 @@ public class Map : MonoBehaviour
 
     private void CreateMap()
     {
-        int[,] map = MapGenerator.GenerateMap(textures.Count, width, height);
+        int[,] map = MapGenerator.GenerateMap(tileTypes.Count, width, height);
+        tiles = new Tile[width, height];
 
         // Create hexagon map
         for (int x = 0; x < width; x++)
@@ -41,22 +47,24 @@ public class Map : MonoBehaviour
                 CreateHexagon(map[x, y], x, y);
             }
         }
+
+        SetTileNeighbours();
     }
 
     /// <summary>
-    /// Creates the hexagon, sets it's position in the map and sets it's material
+    /// Creates the hexagon, initializes the tile and adds it to the tiles list
     /// </summary>
-    /// <param name="hexagonType"> What texture it's going to use from the textures list </param>
+    /// <param name="tileType"> What tile type it's going to use from the tileTypes list </param>
     /// <param name="x"> X position </param>
     /// <param name="y"> Y position </param>
-    private void CreateHexagon(int hexagonType, int x, int y)
+    private void CreateHexagon(int tileType, int x, int y)
     {
         Transform hexagon = Instantiate(hexagonPrefab, transform);
-
         hexagon.position = CalculateHexagonWorldPosition(x, y);
-        hexagon.eulerAngles = new Vector3(0, 180, 0); // Rotate the hexagon so the texture looks right
 
-        hexagon.GetComponent<Renderer>().material.SetTexture("_MainTex", textures[hexagonType]);
+        Tile tile = hexagon.GetComponent<Tile>();
+        tile.Initialize(tileTypes[tileType]);
+        tiles[x, y] = tile;
     }
 
     private Vector3 CalculateHexagonWorldPosition(int x, int y)
@@ -74,5 +82,58 @@ public class Map : MonoBehaviour
         hexagonPosition.y = hexagonPosition.y * (hexagonPrefab.localScale.y + haxagonGap) * hexagonHeightDiffrence;
 
         return new Vector3(hexagonPosition.x, 0, hexagonPosition.y);
+    }
+
+    private void SetTileNeighbours()
+    {
+        for (int x = 0; x < width; x++)
+        {
+            for (int y = 0; y < height; y++)
+            {
+                tiles[x, y].SetNeighbours(GetTileNeighbours(x, y));
+            }
+        }
+    }
+
+    private List<IAStarNode> GetTileNeighbours(int x, int y)
+    {
+        List<IAStarNode> neighbours = new List<IAStarNode>();
+
+        // Left
+        if (x > 0) neighbours.Add(tiles[x - 1, y]);
+
+        // Right
+        if (x < width - 1) neighbours.Add(tiles[x + 1, y]);
+
+        if (y % 2 == 0)
+        {
+            // Top Left
+            if (y > 0 && x > 0) neighbours.Add(tiles[x - 1, y - 1]);
+
+            // Top Right
+            if (y > 0) neighbours.Add(tiles[x, y - 1]);
+
+            // Bottom Left
+            if (y < height - 1 && x > 0) neighbours.Add(tiles[x - 1, y + 1]);
+
+            // Bottom Right
+            if (y < height - 1) neighbours.Add(tiles[x, y + 1]);
+        }
+        else
+        {
+            // Top Left
+            if (y > 0) neighbours.Add(tiles[x, y - 1]);
+
+            // Top Right
+            if (y > 0 && x < width - 1) neighbours.Add(tiles[x + 1, y - 1]);
+
+            // Bottom Left
+            if (y < height - 1) neighbours.Add(tiles[x, y + 1]);
+
+            // Bottom Right
+            if (y < height - 1 && x < width - 1) neighbours.Add(tiles[x + 1, y + 1]);
+        }
+
+        return neighbours;
     }
 }

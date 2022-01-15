@@ -5,13 +5,13 @@ using UnityEngine;
 public static class MapGenerator
 {
     /// <summary>
-    /// Generates a 2D uint array can can be used to create a map of hexagons
+    /// Generates a 2D int array can can be used to create a map of hexagons with textures
     /// </summary>
-    /// <param name="texturesNum"> Amount of textures </param>
+    /// <param name="tileTypesNum"> Amount of tileTypes </param>
     /// <param name="width"> Width of map </param>
     /// <param name="height"> Height of map </param>
-    /// <returns> 2D uint array </returns>
-    public static int[,] GenerateMap(int texturesNum, uint width, uint height)
+    /// <returns> 2D int array of value between 0 and tileTypesNum </returns>
+    public static int[,] GenerateMap(int tileTypesNum, uint width, uint height)
     {
         int[,] map = new int[width, height];
 
@@ -20,7 +20,7 @@ public static class MapGenerator
         {
             for(int j = 0; j < height; j++)
             {
-                map[i, j] = Random.Range(0, texturesNum);
+                map[i, j] = Random.Range(0, tileTypesNum);
             }
         }
 
