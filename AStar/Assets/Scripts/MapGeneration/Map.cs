@@ -95,6 +95,7 @@ public class Map : MonoBehaviour
         }
     }
 
+    // TODO: Make sure the Water tileType doesn't get added, because it's not travelable
     private List<IAStarNode> GetTileNeighbours(int x, int y)
     {
         List<IAStarNode> neighbours = new List<IAStarNode>();

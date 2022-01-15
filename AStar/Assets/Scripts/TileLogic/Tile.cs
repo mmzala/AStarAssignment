@@ -20,12 +20,18 @@ public class Tile : MonoBehaviour, IAStarNode
         Neighbours = neighbours;
     }
 
+    public void SetTileColor(Color color)
+    {
+        renderer.material.color = color;
+    }
+
     #region AStar
     public IEnumerable<IAStarNode> Neighbours { get; private set; }
 
     public float CostTo(IAStarNode neighbour)
     {
-        return 1f;
+        Tile neighbourTile = neighbour as Tile;
+        return neighbourTile.tileType.travelTime;
     }
 
     public float EstimatedCostTo(IAStarNode goal)
