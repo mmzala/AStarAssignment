@@ -8,9 +8,10 @@ public class TileType : ScriptableObject
     public Texture2D texture = null;
 
     [Header("Travel Cost")]
-    [Tooltip("If true, you can travel trough this tile type")]
+    [Tooltip("If true, this tile is traversable")]
     public bool canTravel = true;
 
+    [Tooltip("How much does it cost to travel trough this tile")]
     [Min(1f)]
     public uint travelTime = 1;
 }

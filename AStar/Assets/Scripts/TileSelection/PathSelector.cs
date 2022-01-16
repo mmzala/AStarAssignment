@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Pathing;
 
-public class PathVisualizer : MonoBehaviour
+public class PathSelector : MonoBehaviour
 {
     [Header("Path Selecting")]
     public new Camera camera = null;
@@ -24,34 +24,64 @@ public class PathVisualizer : MonoBehaviour
 
     private readonly Color defaultColor = Color.white;
 
+    // Path variables
     private IList<IAStarNode> path;
     private Tile startingTile = null;
     private Tile endingTile = null;
 
     private void Update()
     {
-        // Select a tile when clicked one of the mouse buttons
+        // Select a tile when clicked left/right mouse button
         if (Input.GetMouseButtonDown(0)) SelectTile(ref startingTile, startingTileColor);
         if (Input.GetMouseButtonDown(1)) SelectTile(ref endingTile, endingTileColor);
     }
 
+    #region TileSelection
+    /// <summary>
+    /// Selects tile by setting it's color and tries to show the path
+    /// </summary>
+    /// <param name="tile"> What tile to select </param>
+    /// <param name="color"> With what color to highlight the tile </param>
     private void SelectTile(ref Tile tile, Color color)
     {
-        // Get new tile and if the can is traversable, update the tile
+        // Get new tile, if it is a tile already in use or is null, then return
         Tile newTile = GetTileInWorld();
-        if(newTile.tileType.canTravel)
+        if (newTile == startingTile || newTile == endingTile || newTile == null) return;
+
+        // If the tile is traversable, update the tile
+        if (newTile.tileType.canTravel)
         {
+            ClearPathColors();
+
             // Reset the color of the last selected tile
             if (tile) tile.SetTileColor(defaultColor);
 
             tile = newTile;
             tile.SetTileColor(color);
 
-            ClearPathColors();
             ShowPath();
         }
     }
 
+    /// <summary>
+    /// Casts a ray to get the tile component of the object you clicked on
+    /// </summary>
+    /// <returns> Tile component of object the user clicked on </returns>
+    private Tile GetTileInWorld()
+    {
+        RaycastHit hit;
+        Ray ray = camera.ScreenPointToRay(Input.mousePosition);
+
+        if (Physics.Raycast(ray, out hit, maxRayDistance, selectionMask))
+        {
+            return hit.transform.GetComponent<Tile>();
+        }
+
+        return null;
+    }
+    #endregion // TileSelection
+
+    #region PathVisualization
     /// <summary>
     /// Gets the path from the AStar class and shows it by changing the color of the tiles in the path
     /// </summary>
@@ -84,21 +114,5 @@ public class PathVisualizer : MonoBehaviour
             tile.SetTileColor(defaultColor);
         }
     }
-
-    /// <summary>
-    /// Casts a ray to get the tile component of the object you clicked on
-    /// </summary>
-    /// <returns> Tile component of selected object </returns>
-    private Tile GetTileInWorld()
-    {
-        RaycastHit hit;
-        Ray ray = camera.ScreenPointToRay(Input.mousePosition);
-
-        if (Physics.Raycast(ray, out hit, maxRayDistance, selectionMask))
-        {
-            return hit.transform.GetComponent<Tile>();
-        }
-
-        return null;
-    }
+    #endregion // PathVisualization
 }

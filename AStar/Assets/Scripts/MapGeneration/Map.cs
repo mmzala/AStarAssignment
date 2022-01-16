@@ -35,7 +35,8 @@ public class Map : MonoBehaviour
         CreateMap();
     }
 
-    private void CreateMap()
+    #region MapCreation
+    public void CreateMap()
     {
         int[,] map = MapGenerator.GenerateMap(tileTypes.Count, width, height);
         tiles = new Tile[width, height];
@@ -84,7 +85,12 @@ public class Map : MonoBehaviour
 
         return new Vector3(hexagonPosition.x, 0, hexagonPosition.y);
     }
+    #endregion // MapCreation
 
+    #region NeighbourSelection
+    /// <summary>
+    /// Sets neighbours for all tiles in the map
+    /// </summary>
     private void SetTileNeighbours()
     {
         for (int x = 0; x < width; x++)
@@ -99,47 +105,56 @@ public class Map : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Gets all neighbour tiles that are traversable of the tile selected by given coordinates
+    /// </summary>
+    /// <param name="x"> X position of the tile in the map </param>
+    /// <param name="y"> Y position of the tile in the ma </param>
+    /// <returns> All neighbour tiles that are traversable </returns>
     private List<IAStarNode> GetTileNeighbours(int x, int y)
     {
         List<IAStarNode> neighbours = new List<IAStarNode>();
         // This allows to add neighbours, only when they are treversable
         Action<Tile> Add = neighbour => { if (neighbour.tileType.canTravel) neighbours.Add(neighbour); };
 
-        // Left
+        // Left tile
         if (x > 0) Add(tiles[x - 1, y]);
 
-        // Right
+        // Right tile
         if (x < width - 1) Add(tiles[x + 1, y]);
 
+        // Is even
         if (y % 2 == 0)
         {
-            // Top Left
+            // Top Left tile
             if (y > 0 && x > 0) Add(tiles[x - 1, y - 1]);
 
-            // Top Right
+            // Top Right tile
             if (y > 0) Add(tiles[x, y - 1]);
 
-            // Bottom Left
+            // Bottom Left tile
             if (y < height - 1 && x > 0) Add(tiles[x - 1, y + 1]);
 
-            // Bottom Right
+            // Bottom Right tile
             if (y < height - 1) Add(tiles[x, y + 1]);
         }
+        // Not even
         else
         {
-            // Top Left
+            // Top Left tile
             if (y > 0) Add(tiles[x, y - 1]);
 
-            // Top Right
+            // Top Right tile
             if (y > 0 && x < width - 1) Add(tiles[x + 1, y - 1]);
 
-            // Bottom Left
+            // Bottom Left tile
             if (y < height - 1) Add(tiles[x, y + 1]);
 
-            // Bottom Right
+            // Bottom Right tile
             if (y < height - 1 && x < width - 1) Add(tiles[x + 1, y + 1]);
         }
 
         return neighbours;
     }
+    #endregion // NeighbourSelection
 }
