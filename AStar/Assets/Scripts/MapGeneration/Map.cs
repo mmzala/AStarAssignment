@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System;
 using UnityEngine;
 using Pathing;
 
@@ -90,49 +91,53 @@ public class Map : MonoBehaviour
         {
             for (int y = 0; y < height; y++)
             {
+                // There os no need to give the non treversable tiles neighbours
+                if (!tiles[x, y].tileType.canTravel) continue;
+
                 tiles[x, y].SetNeighbours(GetTileNeighbours(x, y));
             }
         }
     }
 
-    // TODO: Make sure the Water tileType doesn't get added, because it's not travelable
     private List<IAStarNode> GetTileNeighbours(int x, int y)
     {
         List<IAStarNode> neighbours = new List<IAStarNode>();
+        // This allows to add neighbours, only when they are treversable
+        Action<Tile> Add = neighbour => { if (neighbour.tileType.canTravel) neighbours.Add(neighbour); };
 
         // Left
-        if (x > 0) neighbours.Add(tiles[x - 1, y]);
+        if (x > 0) Add(tiles[x - 1, y]);
 
         // Right
-        if (x < width - 1) neighbours.Add(tiles[x + 1, y]);
+        if (x < width - 1) Add(tiles[x + 1, y]);
 
         if (y % 2 == 0)
         {
             // Top Left
-            if (y > 0 && x > 0) neighbours.Add(tiles[x - 1, y - 1]);
+            if (y > 0 && x > 0) Add(tiles[x - 1, y - 1]);
 
             // Top Right
-            if (y > 0) neighbours.Add(tiles[x, y - 1]);
+            if (y > 0) Add(tiles[x, y - 1]);
 
             // Bottom Left
-            if (y < height - 1 && x > 0) neighbours.Add(tiles[x - 1, y + 1]);
+            if (y < height - 1 && x > 0) Add(tiles[x - 1, y + 1]);
 
             // Bottom Right
-            if (y < height - 1) neighbours.Add(tiles[x, y + 1]);
+            if (y < height - 1) Add(tiles[x, y + 1]);
         }
         else
         {
             // Top Left
-            if (y > 0) neighbours.Add(tiles[x, y - 1]);
+            if (y > 0) Add(tiles[x, y - 1]);
 
             // Top Right
-            if (y > 0 && x < width - 1) neighbours.Add(tiles[x + 1, y - 1]);
+            if (y > 0 && x < width - 1) Add(tiles[x + 1, y - 1]);
 
             // Bottom Left
-            if (y < height - 1) neighbours.Add(tiles[x, y + 1]);
+            if (y < height - 1) Add(tiles[x, y + 1]);
 
             // Bottom Right
-            if (y < height - 1 && x < width - 1) neighbours.Add(tiles[x + 1, y + 1]);
+            if (y < height - 1 && x < width - 1) Add(tiles[x + 1, y + 1]);
         }
 
         return neighbours;

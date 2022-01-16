@@ -34,9 +34,12 @@ public class Tile : MonoBehaviour, IAStarNode
         return neighbourTile.tileType.travelTime;
     }
 
+    // TODO: Change this to work the correctly with travel time
     public float EstimatedCostTo(IAStarNode goal)
     {
-        return 1f;
+        Tile goalTile = goal as Tile;
+        Vector3 direction = goalTile.transform.position - transform.position;
+        return direction.magnitude;
     }
     #endregion // AStar
 }

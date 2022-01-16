@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Pathing;
 
 public class PathVisualizer : MonoBehaviour
 {
@@ -21,12 +22,15 @@ public class PathVisualizer : MonoBehaviour
     [SerializeField]
     private Color endingTileColor = Color.red;
 
+    private readonly Color defaultColor = Color.white;
+
+    private IList<IAStarNode> path;
     private Tile startingTile = null;
     private Tile endingTile = null;
 
     private void Update()
     {
-        // Select a tile when clicked one of th emouse buttons
+        // Select a tile when clicked one of the mouse buttons
         if (Input.GetMouseButtonDown(0)) SelectTile(ref startingTile, startingTileColor);
         if (Input.GetMouseButtonDown(1)) SelectTile(ref endingTile, endingTileColor);
     }
@@ -38,10 +42,46 @@ public class PathVisualizer : MonoBehaviour
         if(newTile.tileType.canTravel)
         {
             // Reset the color of the last selected tile
-            if (tile) tile.SetTileColor(Color.white);
+            if (tile) tile.SetTileColor(defaultColor);
 
             tile = newTile;
             tile.SetTileColor(color);
+
+            ClearPathColors();
+            ShowPath();
+        }
+    }
+
+    /// <summary>
+    /// Gets the path from the AStar class and shows it by changing the color of the tiles in the path
+    /// </summary>
+    private void ShowPath()
+    {
+        if (!startingTile || !endingTile) return;
+
+        path = AStar.GetPath(startingTile, endingTile);
+        if (path == null) return; // If path not found, then return
+
+        // Change color of all tiles in path, but skip the first and last tile, because they have different colors
+        for (int i = 1; i < path.Count - 1; i++)
+        {
+            Tile tile = path[i] as Tile;
+            tile.SetTileColor(pathColor);
+        }
+    }
+
+    /// <summary>
+    /// Clears the old path by changing the tiles to default color
+    /// </summary>
+    private void ClearPathColors()
+    {
+        if (path == null) return;
+
+        // Change color of all tiles in path, but skip the first and last tile, because they have different colors
+        for (int i = 1; i < path.Count - 1; i++)
+        {
+            Tile tile = path[i] as Tile;
+            tile.SetTileColor(defaultColor);
         }
     }
 
